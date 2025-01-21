@@ -1,5 +1,10 @@
 # Movie Streaming App
 
+## @TODO:
+
+Add a production config
+- nginx container with domain + ssl var support
+
 A simple full-stack application for searching movies (via TMDB) and embedding a video player (via `embed.su`).  
 It consists of:
 
