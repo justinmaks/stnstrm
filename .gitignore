@@ -1,0 +1,39 @@
+# ------------------------
+# Node Modules & Packages
+# ------------------------
+node_modules/
+client/node_modules/
+server/node_modules/
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# -------------
+# Environment
+# -------------
+.env
+.env.*   # if you have multiple env files like .env.production, etc.
+
+# ------------------
+# Build Artifacts
+# ------------------
+build/
+dist/
+client/build/
+server/build/
+coverage/
+
+# --------------------
+# OS & Editor Files
+# --------------------
+.DS_Store
+Thumbs.db
+.vscode/
+*.swp
+
+# ----------------
+# Docker Files
+# ----------------
+# (If you keep Docker build artifacts, you can ignore them here)
+# e.g., if you store Docker intermediate files somewhere:
+# docker-temp/
