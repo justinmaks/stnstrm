@@ -44,6 +44,22 @@ app.get('/api/search', async (req, res) => {
   }
 });
 
+app.get('/api/movie/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    // Request details from TMDB for the specific movie
+    const tmdbUrl = `https://api.themoviedb.org/3/movie/${id}?api_key=${TMDB_API_KEY}`;
+
+    const response = await axios.get(tmdbUrl);
+    // Return the detailed info (title, overview, release date, etc.)
+    res.json(response.data);
+
+  } catch (error) {
+    console.error('Error fetching movie details:', error.message);
+    res.status(500).json({ error: 'Failed to fetch movie details.' });
+  }
+});
+
 /**
  * Start the server
  */
