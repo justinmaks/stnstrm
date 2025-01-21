@@ -28,23 +28,25 @@ function Home() {
   };
 
   return (
-    <div style={{ padding: '1rem' }}>
+    <div className="container">
       <h1>Movie Streamer</h1>
 
       {/* Search Form */}
-      <form onSubmit={handleSearch}>
+      <form className="search-form" onSubmit={handleSearch}>
         <input
           type="text"
+          className="search-input"
           placeholder="Search for a movie..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          style={{ width: 300, marginRight: 8 }}
         />
-        <button type="submit">Search</button>
+        <button type="submit" className="search-button">
+          Search
+        </button>
       </form>
 
       {/* Display search results */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', marginTop: '1rem', gap: '1rem' }}>
+      <div className="movie-grid">
         {movies.map((movie) => {
           const posterUrl = movie.poster_path
             ? `https://image.tmdb.org/t/p/w200${movie.poster_path}`
@@ -53,14 +55,10 @@ function Home() {
           return (
             <div
               key={movie.id}
-              style={{ width: 150, textAlign: 'center', cursor: 'pointer' }}
+              className="movie-item"
               onClick={() => handleSelectMovie(movie.id)}
             >
-              <img
-                src={posterUrl}
-                alt={movie.title}
-                style={{ width: '100%', borderRadius: 6 }}
-              />
+              <img src={posterUrl} alt={movie.title} />
               <p>{movie.title}</p>
             </div>
           );

@@ -3,6 +3,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Home from './Home';
 import MovieEmbed from './MovieEmbed';
+import './App.css';
 
 function App() {
   return (
