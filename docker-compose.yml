@@ -4,22 +4,48 @@ services:
   server:
     build: ./server
     container_name: movie_server
-    env_file: 
+    env_file:
       - .env
     environment:
-      # Optionally, you can override or ensure the env is set
       - TMDB_API_KEY=${TMDB_API_KEY}
-    ports:
-      - "3001:3001"
-    # If you'd like to restart automatically
-    # restart: unless-stopped
+    expose:
+      - "3001"
+    networks:
+      - movie_net
 
   client:
     build: ./client
     container_name: movie_client
-    ports:
-      #- "3000:80"     # If using Nginx approach (port 80 in the container)
-      - 3000:3000 # or if using the Node 'serve' approach
+    expose:
+      - "3000"
     depends_on:
       - server
-    # restart: unless-stopped
+    networks:
+      - movie_net
+
+  nginx:
+    build: ./nginx
+    container_name: movie_nginx
+    # Bind host ports 80 (HTTP) and 443 (HTTPS)
+    ports:
+      - "80:80"
+      - "443:443"
+    # Domain + SSL usage are toggled via environment variables
+    environment:
+      - DOMAIN=${DOMAIN:-example.com}
+      - USE_SSL=${USE_SSL:-false}
+      #In production, you’ll set DOMAIN=example.com and USE_SSL=true (or something similar).
+      #In local dev, you can keep DOMAIN=localhost and USE_SSL=false, or omit them so it defaults to HTTP.
+    depends_on:
+      - server
+      - client
+    #volumes:
+      # If you want to mount your certs from the host, do something like:
+      # - ./nginx/certs:/etc/nginx/certs:ro
+      # (But this example copies them in at build time)
+    networks:
+      - movie_net
+
+networks:
+  movie_net:
+    driver: bridge
