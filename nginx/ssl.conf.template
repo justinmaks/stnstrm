@@ -1,0 +1,33 @@
+# =============================================
+# Option 3: ssl.conf.template (HTTP + HTTPS)
+# =============================================
+
+# 1) HTTP server that redirects everything to HTTPS
+server {
+    listen 80;
+    server_name $DOMAIN;
+    return 301 https://$host$request_uri;
+}
+
+# 2) HTTPS server
+server {
+    listen 443 ssl;
+    server_name $DOMAIN;
+
+    ssl_certificate /etc/nginx/certs/fullchain.pem;
+    ssl_certificate_key /etc/nginx/certs/privkey.pem;
+
+    # The /api path proxies to Node server
+    location /api/ {
+        proxy_pass http://movie_server:3001/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # All other requests -> Vue client
+    location / {
+        proxy_pass http://movie_client:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}

@@ -1,49 +1,20 @@
-# This template references $DOMAIN and $USE_SSL
+# =============================================
+# Option 3: default.conf.template (HTTP only)
+# =============================================
 
-# HTTP server
 server {
     listen 80;
     server_name $DOMAIN;
 
-    # If we are using SSL, redirect all HTTP -> HTTPS
-    if ($USE_SSL = "true") {
-        return 301 https://$host$request_uri;
-    }
-
-    # If not using SSL, pass traffic directly to the client
+    # All traffic goes directly to the Vue client
     location / {
         proxy_pass http://movie_client:3000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
 
-    # The /api path proxies to Node server
     location /api/ {
         proxy_pass http://movie_server:3001/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
-
-# HTTPS server (only if USE_SSL = true)
-server {
-    listen 443 ssl;
-    server_name $DOMAIN;
-
-    ssl_certificate /etc/nginx/certs/fullchain.pem;
-    ssl_certificate_key /etc/nginx/certs/privkey.pem;
-
-    # If you have intermediate chain, it goes in fullchain.pem
-    # or add 'ssl_trusted_certificate' directive
-
-    location /api/ {
-        proxy_pass http://movie_server:3001/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-
-    location / {
-        proxy_pass http://movie_client:3000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }

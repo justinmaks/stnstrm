@@ -1,6 +1,10 @@
 #!/bin/sh
 
-# Use envsubst to replace $DOMAIN and $USE_SSL in the config template
-envsubst '$DOMAIN $USE_SSL' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf
+# If USE_SSL=true, use ssl.conf.template; else default.conf.template
+if [ "$USE_SSL" = "true" ]; then
+  cp /etc/nginx/templates/ssl.conf.template /etc/nginx/conf.d/default.conf
+else
+  cp /etc/nginx/templates/default.conf.template /etc/nginx/conf.d/default.conf
+fi
 
 exec "$@"
