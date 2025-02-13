@@ -9,7 +9,7 @@ A simple full-stack application for searching movies (via TMDB) and embedding a 
 It consists of:
 
 1. **server/** – A Node.js/Express server (protects TMDB key, provides `/api/search`).  
-2. **client/** – A React front-end that lets users:
+2. **client/** – A Vue front-end that lets users:
    - Search movies
    - Display posters
    - Embed a playable stream
