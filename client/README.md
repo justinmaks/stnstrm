@@ -1,70 +1,155 @@
-# Getting Started with Create React App
+# Vue Movie Streamer Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is a Vue 3 frontend application, bundled with [Vite](https://vitejs.dev/). It provides a user interface for searching and streaming movies, using data from [TMDB](https://www.themoviedb.org/) via a Node/Express server (running separately).
 
-## Available Scripts
+## Table of Contents
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Project Structure](#project-structure)
+- [Installation](#installation)
+- [Scripts](#scripts)
+  - [Development](#development)
+  - [Production Build](#production-build)
+  - [Preview Build](#preview-build)
+- [Docker Usage](#docker-usage)
+  - [Local Docker Build](#local-docker-build)
+  - [Docker Compose](#docker-compose)
+- [Environment Variables](#environment-variables)
+- [License](#license)
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **Movie Search**: Enter a search query to find movies (powered by TMDB API).
+- **Movie Details**: Displays title, release date, and overview.
+- **Embedded Player**: An `<iframe>` that points to an external streaming service.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## Prerequisites
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- [Node.js](https://nodejs.org/) (version 16 or higher recommended)
+- [npm](https://www.npmjs.com/) (bundled with Node)
+- A running **backend server** that listens on port `3001` by default. (See the companion [Node/Express server](../server) in this project.)
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Project Structure
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```
+client/
+├─ Dockerfile
+├─ index.html             # Vite entry point
+├─ package.json
+├─ package-lock.json
+├─ vite.config.js
+└─ src/
+   ├─ main.js             # Initializes Vue app
+   ├─ App.vue             # Root Vue component
+   ├─ router/
+   │  └─ index.js         # Vue Router setup
+   ├─ views/
+   │  ├─ HomeView.vue
+   │  └─ MovieView.vue
+   └─ assets/
+      └─ ...             # Static assets, images, CSS, etc.
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## Installation
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+1. **Clone** this repository (or your fork).
+2. **Navigate** to the `client` folder:
+   ```bash
+   cd client
+   ```
+3. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+   This will install Vue, Vite, Vue Router, and other required packages.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Scripts
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Development
 
-## Learn More
+Run a local development server with hot-reloading on port 5173 by default:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```bash
+npm run dev
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+You can then open [http://localhost:5173](http://localhost:5173) in your browser.  
+Make sure your Node/Express server is also running on port `3001` (or update the fetch URLs in the Vue components if needed).
 
-### Code Splitting
+### Production Build
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Generate a production-ready build in the `dist` folder:
 
-### Analyzing the Bundle Size
+```bash
+npm run build
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Then you can serve the `dist` folder with any static file server or via Docker (see below).
 
-### Making a Progressive Web App
+### Preview Build
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+After building, you can run:
 
-### Advanced Configuration
+```bash
+npm run preview
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+This starts a local server so you can preview the production build on [http://localhost:4173](http://localhost:4173).
 
-### Deployment
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## Docker Usage
 
-### `npm run build` fails to minify
+### Local Docker Build
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+From within the `client` directory, you can build and run this as a container:
+
+1. **Build** the Docker image:
+   ```bash
+   docker build -t vue-movie-client .
+   ```
+2. **Run** the container:
+   ```bash
+   docker run -p 3000:3000 --name vue_client vue-movie-client
+   ```
+3. Open [http://localhost:3000](http://localhost:3000) in your browser to view the app.
+
+> **Note**: This container calls the backend at `http://localhost:3001`. You need to ensure that your Node server container is also running and accessible at that address (e.g., via Docker Compose or a correct network setup).
+
+### Docker Compose
+
+If your project root has a `docker-compose.yml` that defines both `server` and `client` services, simply run:
+
+```bash
+docker compose up --build
+```
+
+- The Node server (port `3001`) and the Vue client (port `3000`) will both start in containers.
+- Open [http://localhost:3000](http://localhost:3000) to access the frontend.
+- The frontend calls the backend at `http://localhost:3001`.
+
+---
+
+## Environment Variables
+
+Typically, the frontend does not need environment variables when making direct requests to `http://localhost:3001`. If you do need to configure external URLs or adjust environment settings, you can:
+- Use `.env` files recognized by Vite (e.g., `.env.development`, `.env.production`) and reference them with `import.meta.env`.
+- Or directly update your fetch calls in the Vue components.
+
+For a production environment, you might:
+- Proxy API calls in `vite.config.js` via the `server.proxy` setting.
+- Use environment variables in Docker or a reverse proxy to handle external API addresses.
+
+---
+
+
