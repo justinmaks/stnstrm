@@ -101,59 +101,72 @@ Inside the `nginx/` folder are:
 2. **default.conf.template**:
    ```nginx
    server {
-       listen 80;
-       server_name $DOMAIN;
+    listen 80;
+    server_name $DOMAIN;
 
-       # If we're using SSL, redirect HTTP -> HTTPS
-       if ($USE_SSL = "true") {
-           return 301 https://$host$request_uri;
-       }
+    # All traffic goes directly to the Vue client
+    location / {
+        proxy_pass http://movie_client:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
 
-       # Proxy non-SSL traffic to the Vue client
-       location / {
-           proxy_pass http://movie_client:3000;
-           proxy_set_header Host $host;
-           proxy_set_header X-Real-IP $remote_addr;
-       }
+    location /api/ {
+        proxy_pass http://movie_server:3001/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
 
-       # Proxy /api to the Node server
-       location /api/ {
-           proxy_pass http://movie_server:3001/;
-           proxy_set_header Host $host;
-           proxy_set_header X-Real-IP $remote_addr;
-       }
-   }
+   
+   **ssl.conf.template**:
+   ```nginx
+   # 1) HTTP server that redirects everything to HTTPS
+server {
+    listen 80;
+    server_name $DOMAIN;
+    return 301 https://$host$request_uri;
+}
 
-   # HTTPS Server
-   server {
-       listen 443 ssl;
-       server_name $DOMAIN;
+# 2) HTTPS server
+server {
+    listen 443 ssl;
+    server_name $DOMAIN;
 
-       ssl_certificate /etc/nginx/certs/fullchain.pem;
-       ssl_certificate_key /etc/nginx/certs/privkey.pem;
+    ssl_certificate /etc/nginx/certs/fullchain.pem;
+    ssl_certificate_key /etc/nginx/certs/privkey.pem;
 
-       location /api/ {
-           proxy_pass http://movie_server:3001/;
-           proxy_set_header Host $host;
-           proxy_set_header X-Real-IP $remote_addr;
-       }
+    # The /api path proxies to Node server
+    location /api/ {
+        proxy_pass http://movie_server:3001/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
 
-       location / {
-           proxy_pass http://movie_client:3000;
-           proxy_set_header Host $host;
-           proxy_set_header X-Real-IP $remote_addr;
-       }
-   }
+    # All other requests -> Vue client
+    location / {
+        proxy_pass http://movie_client:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+
    ```
 
 3. **entrypoint.sh**:
    ```bash
    #!/bin/sh
 
-   # Replace variables in default.conf.template with env values
-   envsubst '$DOMAIN $USE_SSL' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf
+    # If USE_SSL=true, use ssl.conf.template; else default.conf.template
+    if [ "$USE_SSL" = "true" ]; then
+    cp /etc/nginx/templates/ssl.conf.template /etc/nginx/conf.d/default.conf
+    else
+    cp /etc/nginx/templates/default.conf.template /etc/nginx/conf.d/default.conf
+    fi
 
-   exec "$@"
+    exec "$@"
+
    ```
 
 4. **certs/**: Contains two files for production:
